@@ -1,0 +1,14 @@
+.addButton {
+  background-color: #008c5c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.addButton:hover {
+  background-color: #1f4a34;
+}
