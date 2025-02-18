@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AddTodoForm from "./components/AddTodoForm";
 import "./App.css";
 import TodoList from "./components/TodoList";
@@ -10,7 +10,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortField, setSortField] = useState("title");
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const url = `https://api.airtable.com/v0/${
       import.meta.env.VITE_AIRTABLE_BASE_ID
     }/${
@@ -56,11 +56,11 @@ function App() {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  };
+  }, [sortOrder, sortField]);
 
   useEffect(() => {
     fetchData();
-  }, [sortOrder, sortField]);
+  }, [fetchData]);
 
   useEffect(() => {
     if (!isLoading) {
