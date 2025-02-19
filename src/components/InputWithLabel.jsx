@@ -1,12 +1,12 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import style from "./Input.module.css";
 import PropTypes from "prop-types";
 
 function InputWithLabel({ id, todoTitle, onInputChange, children }) {
-  const inputRef = React.useRef();
-  React.useEffect(() => {
+  const inputRef = useRef();
+  useEffect(() => {
     inputRef.current.focus();
-  });
+  }, []);
 
   return (
     <>
@@ -14,7 +14,7 @@ function InputWithLabel({ id, todoTitle, onInputChange, children }) {
       <input
         className={style.inputField}
         ref={inputRef}
-        id="todoTitle"
+        id={id}
         type="text"
         name="title"
         value={todoTitle}

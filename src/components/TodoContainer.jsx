@@ -158,11 +158,12 @@ function TodoContainer({ tableName }) {
         <option value="completedAt-desc">Completed At (Newest First)</option>
       </select>
 
+      <AddTodoForm onAddTodo={addTodo} />
+
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <AddTodoForm onAddTodo={addTodo} />
           <TodoList todoList={todoList} onRemoveTodo={removeTodo} />
         </>
       )}
