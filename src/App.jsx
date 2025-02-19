@@ -1,23 +1,12 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import TodoContainer from "./components/TodoContainer";
+import NavMenu from "./components/NavMenu";
 
 function App() {
   return (
     <BrowserRouter>
-      {/* Navigation Menu */}
-      <header>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/todo">Todo List</Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
+      <NavMenu />
 
       <Routes>
         {/* Home Page Route */}
