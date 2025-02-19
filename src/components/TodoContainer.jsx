@@ -9,10 +9,12 @@ function TodoContainer({ tableName }) {
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortField, setSortField] = useState("title");
 
+  const airtableBaseURLandID = `https://api.airtable.com/v0/${
+    import.meta.env.VITE_AIRTABLE_BASE_ID
+  }`;
+
   const fetchData = useCallback(async () => {
-    const url = `https://api.airtable.com/v0/${
-      import.meta.env.VITE_AIRTABLE_BASE_ID
-    }/${tableName}?sort[0][field]=${sortField}&sort[0][direction]=${sortOrder}`;
+    const url = `${airtableBaseURLandID}/${tableName}?sort[0][field]=${sortField}&sort[0][direction]=${sortOrder}`;
 
     const options = {
       method: "GET",
@@ -41,7 +43,7 @@ function TodoContainer({ tableName }) {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-  }, [tableName, sortField, sortOrder]);
+  }, [airtableBaseURLandID, tableName, sortField, sortOrder]);
 
   useEffect(() => {
     fetchData();
@@ -72,9 +74,41 @@ function TodoContainer({ tableName }) {
     });
   };
 
-  const addTodo = (newTodo) => {
-    const updatedTodoList = [...todoList, newTodo];
-    setTodoList(sortTodos(updatedTodoList));
+  const addTodo = async (input) => {
+    const url = `${airtableBaseURLandID}/${tableName}`;
+    const newRecord = {
+      fields: {
+        title: input.title,
+        // completedAt: "2025-01-16",
+      },
+    };
+
+    const options = {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newRecord),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const data = await response.json();
+      const addedTodo = {
+        id: data.id,
+        title: data.fields.title,
+        completedAt: data.fields.completedAt || "Not Completed",
+      };
+
+      const updatedTodoList = sortTodos([...todoList, addedTodo]);
+      setTodoList(updatedTodoList);
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
   };
 
   const handleSortChange = (value) => {
