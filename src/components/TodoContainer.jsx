@@ -117,9 +117,31 @@ function TodoContainer({ tableName }) {
     setSortOrder(order);
   };
 
-  const removeTodo = (id) => {
-    const updatedTodoList = todoList.filter((todo) => todo.id !== id);
-    setTodoList(updatedTodoList);
+  const removeTodo = async (id) => {
+    const url = `${airtableBaseURLandID}/${tableName}/${id}`;
+
+    const options = {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(`Deleted record ID: ${data.id}`);
+
+      const updatedTodoList = todoList.filter((todo) => todo.id !== id);
+      setTodoList(updatedTodoList);
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
   };
 
   return (
