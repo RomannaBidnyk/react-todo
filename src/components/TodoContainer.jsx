@@ -56,7 +56,7 @@ function TodoContainer({ tableName }) {
   }, [todoList, isLoading, sortOrder, sortField]);
 
   const sortTodos = (todos) => {
-    return [...todos].sort((a, b) => {
+    return todos.sort((a, b) => {
       let aValue = a[sortField] || "";
       let bValue = b[sortField] || "";
 
