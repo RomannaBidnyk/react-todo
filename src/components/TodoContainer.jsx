@@ -61,15 +61,22 @@ function TodoContainer({ tableName }) {
       let bValue = b[sortField] || "";
 
       if (sortField === "completedAt") {
-        aValue = aValue ? new Date(aValue) : 0;
-        bValue = bValue ? new Date(bValue) : 0;
+        aValue =
+          aValue && aValue !== "Not Completed"
+            ? new Date(aValue).getTime()
+            : sortOrder === "asc"
+            ? Infinity
+            : 0;
+        bValue =
+          bValue && bValue !== "Not Completed"
+            ? new Date(bValue).getTime()
+            : sortOrder === "asc"
+            ? Infinity
+            : 0;
       }
 
-      if (aValue > bValue) {
-        return sortOrder === "asc" ? 1 : -1;
-      } else if (aValue < bValue) {
-        return sortOrder === "asc" ? -1 : 1;
-      }
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
       return 0;
     });
   };
