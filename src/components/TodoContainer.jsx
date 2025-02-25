@@ -2,12 +2,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import AddTodoForm from "./AddTodoForm";
 import TodoList from "./TodoList";
+import Pagination from "./Pagination";
+import Filtering from "./Filtering";
+import Sorting from "./Sorting";
 
 function TodoContainer({ tableName }) {
   const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortField, setSortField] = useState("title");
+  const [filter, setFilter] = useState("all"); // "all", "todo", "done"
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const todosPerPage = 10;
 
   const airtableBaseURLandID = `https://api.airtable.com/v0/${
     import.meta.env.VITE_AIRTABLE_BASE_ID
@@ -40,6 +47,7 @@ function TodoContainer({ tableName }) {
 
       setTodoList(todos);
       setIsLoading(false);
+      setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -55,21 +63,32 @@ function TodoContainer({ tableName }) {
     }
   }, [todoList, isLoading, sortOrder, sortField]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
+
   const sortTodos = (todos) => {
     return todos.sort((a, b) => {
       let aValue = a[sortField] || "";
       let bValue = b[sortField] || "";
 
       if (sortField === "completedAt") {
-        aValue = aValue ? new Date(aValue) : 0;
-        bValue = bValue ? new Date(bValue) : 0;
+        aValue =
+          aValue && aValue !== "Not Completed"
+            ? new Date(aValue).getTime()
+            : sortOrder === "asc"
+            ? Infinity
+            : 0;
+        bValue =
+          bValue && bValue !== "Not Completed"
+            ? new Date(bValue).getTime()
+            : sortOrder === "asc"
+            ? Infinity
+            : 0;
       }
 
-      if (aValue > bValue) {
-        return sortOrder === "asc" ? 1 : -1;
-      } else if (aValue < bValue) {
-        return sortOrder === "asc" ? -1 : 1;
-      }
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
       return 0;
     });
   };
@@ -79,7 +98,6 @@ function TodoContainer({ tableName }) {
     const newRecord = {
       fields: {
         title: input.title,
-        // completedAt: "2025-01-16",
       },
     };
 
@@ -144,27 +162,128 @@ function TodoContainer({ tableName }) {
     }
   };
 
+  const updateTodoCompletion = async (id, isCompleted) => {
+    const url = `${airtableBaseURLandID}/${tableName}/${id}`;
+    const completedAt = isCompleted
+      ? new Date().toISOString().slice(0, 16).replace("T", " ")
+      : null;
+
+    const updatedFields = {
+      fields: {
+        completedAt: completedAt,
+      },
+    };
+
+    const options = {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedFields),
+    };
+
+    try {
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error(`Error updating todo: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const updatedTodoList = todoList.map((todo) =>
+        todo.id === id
+          ? { ...todo, completedAt: data.fields.completedAt || null }
+          : todo
+      );
+
+      setTodoList(updatedTodoList);
+    } catch (error) {
+      console.error("Error updating todo completion:", error);
+    }
+  };
+
+  const filteredTodos = todoList.filter((todo) => {
+    if (filter === "all") return true;
+    if (filter === "todo") return todo.completedAt === "Not Completed";
+    if (filter === "done") return todo.completedAt !== "Not Completed";
+    return true;
+  });
+
+  const indexOfLastTodo = currentPage * todosPerPage;
+  const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
+  const currentTodos = filteredTodos.slice(indexOfFirstTodo, indexOfLastTodo);
+  const totalPages = Math.ceil(filteredTodos.length / todosPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const updateTodoTitle = async (id, newTitle) => {
+    const url = `${airtableBaseURLandID}/${tableName}/${id}`;
+    const updatedFields = {
+      fields: {
+        title: newTitle,
+      },
+    };
+  
+    const options = {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedFields),
+    };
+  
+    try {
+      const response = await fetch(url, options);
+  
+      if (!response.ok) {
+        throw new Error(`Error updating todo title: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      const updatedTodoList = todoList.map((todo) =>
+        todo.id === id
+          ? { ...todo, title: data.fields.title }
+          : todo
+      );
+  
+      setTodoList(updatedTodoList);
+    } catch (error) {
+      console.error("Error updating todo title:", error);
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>ToDo List: {tableName}</h1>
-      <label>Sort by: </label>
-      <select
-        value={`${sortField}-${sortOrder}`}
-        onChange={(e) => handleSortChange(e.target.value)}
-      >
-        <option value="title-asc">Title A-Z</option>
-        <option value="title-desc">Title Z-A</option>
-        <option value="completedAt-asc">Completed At (Oldest First)</option>
-        <option value="completedAt-desc">Completed At (Newest First)</option>
-      </select>
-
+      <Sorting
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+      />
       <AddTodoForm onAddTodo={addTodo} />
+      <Filtering filter={filter} setFilter={setFilter} />
 
       {isLoading ? (
         <p>Loading...</p>
       ) : (
         <>
-          <TodoList todoList={todoList} onRemoveTodo={removeTodo} />
+          <TodoList
+            todoList={currentTodos}
+            onRemoveTodo={removeTodo}
+            onUpdateCompletion={updateTodoCompletion}
+            onEditTodo={updateTodoTitle}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </>
       )}
     </div>
