@@ -3,12 +3,15 @@ import PropTypes from "prop-types";
 import AddTodoForm from "./AddTodoForm";
 import TodoList from "./TodoList";
 import Pagination from "./Pagination";
+import Filtering from "./Filtering";
 
 function TodoContainer({ tableName }) {
   const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortField, setSortField] = useState("title");
+  const [filter, setFilter] = useState("all");  // "all", "todo", "done"
+
   const [currentPage, setCurrentPage] = useState(1);
   const todosPerPage = 10;
 
@@ -58,6 +61,10 @@ function TodoContainer({ tableName }) {
       localStorage.setItem("savedTodoList", JSON.stringify(todoList));
     }
   }, [todoList, isLoading, sortOrder, sortField]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   const sortTodos = (todos) => {
     return todos.sort((a, b) => {
@@ -196,10 +203,17 @@ function TodoContainer({ tableName }) {
     }
   };
 
+  const filteredTodos = todoList.filter((todo) => {
+    if (filter === "all") return true;
+    if (filter === "todo") return todo.completedAt === "Not Completed";
+    if (filter === "done") return todo.completedAt !== "Not Completed";
+    return true;
+  });
+
   const indexOfLastTodo = currentPage * todosPerPage;
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
-  const currentTodos = todoList.slice(indexOfFirstTodo, indexOfLastTodo);
-  const totalPages = Math.ceil(todoList.length / todosPerPage);
+  const currentTodos = filteredTodos.slice(indexOfFirstTodo, indexOfLastTodo);
+  const totalPages = Math.ceil(filteredTodos.length / todosPerPage);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -220,6 +234,8 @@ function TodoContainer({ tableName }) {
       </select>
 
       <AddTodoForm onAddTodo={addTodo} />
+
+      <Filtering filter={filter} setFilter={setFilter} />
 
       {isLoading ? (
         <p>Loading...</p>
