@@ -2,11 +2,16 @@ import style from "./TodoListItem.module.css";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-function TodoListItem({ item: todo, onRemoveTodo }) {
-  const [isCompleted, setIsCompleted] = useState(false);
+function TodoListItem({ item: todo, onRemoveTodo, onUpdateCompletion }) {
+  const [isCompleted, setIsCompleted] = useState(
+    !!todo.completedAt && todo.completedAt !== "Not Completed"
+  );
 
   const handleCheckboxChange = () => {
-    setIsCompleted((prev) => !prev);
+    const newCompletedState = !isCompleted;
+    setIsCompleted(newCompletedState);
+
+    onUpdateCompletion(todo.id, newCompletedState);
   };
 
   return (
@@ -32,8 +37,10 @@ TodoListItem.propTypes = {
   item: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     title: PropTypes.string.isRequired,
+    completedAt: PropTypes.string,
   }).isRequired,
   onRemoveTodo: PropTypes.func.isRequired,
+  onUpdateCompletion: PropTypes.func,
 };
 
 export default TodoListItem;

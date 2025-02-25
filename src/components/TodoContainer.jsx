@@ -144,6 +144,48 @@ function TodoContainer({ tableName }) {
     }
   };
 
+  const updateTodoCompletion = async (id, isCompleted) => {
+    const url = `${airtableBaseURLandID}/${tableName}/${id}`;
+    const completedAt = isCompleted
+      ? new Date().toISOString().slice(0, 16).replace("T", " ")
+      : null;
+
+    const updatedFields = {
+      fields: {
+        completedAt: completedAt,
+      },
+    };
+
+    const options = {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedFields),
+    };
+
+    try {
+      const response = await fetch(url, options);
+
+      if (!response.ok) {
+        throw new Error(`Error updating todo: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const updatedTodoList = todoList.map((todo) =>
+        todo.id === id
+          ? { ...todo, completedAt: data.fields.completedAt || null }
+          : todo
+      );
+
+      setTodoList(updatedTodoList);
+    } catch (error) {
+      console.error("Error updating todo completion:", error);
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>ToDo List: {tableName}</h1>
@@ -164,7 +206,11 @@ function TodoContainer({ tableName }) {
         <p>Loading...</p>
       ) : (
         <>
-          <TodoList todoList={todoList} onRemoveTodo={removeTodo} />
+          <TodoList
+            todoList={todoList}
+            onRemoveTodo={removeTodo}
+            onUpdateCompletion={updateTodoCompletion}
+          />
         </>
       )}
     </div>
