@@ -12,6 +12,16 @@
   list-style: none;
 }
 
+.completed span {
+  text-decoration: line-through;
+  color: #4e596b;
+}
+
+.completed {
+  background-color: #faedeb;
+  border: 1px solid #fed7c6;
+}
+
 .ListItem:hover {
   color: #381875;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -30,4 +40,28 @@
 
 .removeButton:hover {
   background-color: #a00000;
+}
+
+input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #1b944b;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #2eb660;
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✔";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: -3px;
+  left: 2px;
 }
