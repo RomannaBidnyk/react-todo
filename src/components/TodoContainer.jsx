@@ -2,12 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import AddTodoForm from "./AddTodoForm";
 import TodoList from "./TodoList";
+import Pagination from "./Pagination";
 
 function TodoContainer({ tableName }) {
   const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortField, setSortField] = useState("title");
+  const [currentPage, setCurrentPage] = useState(1);
+  const todosPerPage = 10;
 
   const airtableBaseURLandID = `https://api.airtable.com/v0/${
     import.meta.env.VITE_AIRTABLE_BASE_ID
@@ -40,6 +43,7 @@ function TodoContainer({ tableName }) {
 
       setTodoList(todos);
       setIsLoading(false);
+      setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -86,7 +90,6 @@ function TodoContainer({ tableName }) {
     const newRecord = {
       fields: {
         title: input.title,
-        // completedAt: "2025-01-16",
       },
     };
 
@@ -193,6 +196,15 @@ function TodoContainer({ tableName }) {
     }
   };
 
+  const indexOfLastTodo = currentPage * todosPerPage;
+  const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
+  const currentTodos = todoList.slice(indexOfFirstTodo, indexOfLastTodo);
+  const totalPages = Math.ceil(todoList.length / todosPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h1>ToDo List: {tableName}</h1>
@@ -214,9 +226,14 @@ function TodoContainer({ tableName }) {
       ) : (
         <>
           <TodoList
-            todoList={todoList}
+            todoList={currentTodos}
             onRemoveTodo={removeTodo}
             onUpdateCompletion={updateTodoCompletion}
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
         </>
       )}
