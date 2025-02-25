@@ -1,11 +1,12 @@
 # ToDo List App 📝
 
 ToDo List App built with **React** and **Vite**.
+
 Easily create a list of things to do and track completion - perfect for tasks like a study list 📚.
 
 ## 🚀 Live Demo
 
-[View the Live App on Render](https://react-todo-list-app-i58s.onrender.com/)
+<a href="https://react-todo-list-app-i58s.onrender.com/" target="_blank" rel="noopener noreferrer">View the Live App on Render</a>
 
 ## 📂 Features
 
@@ -43,7 +44,7 @@ _Inline editing of a task title with save/cancel options._
 
 ## 💾 Installation
 
-- git clone ...
+- git clone
 - cd react-todo
 - npm install
 - npm run dev
