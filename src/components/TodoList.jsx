@@ -1,7 +1,7 @@
 import TodoListItem from "./TodoListItem";
 import PropTypes from "prop-types";
 
-function TodoList({ todoList, onRemoveTodo, onUpdateCompletion }) {
+function TodoList({ todoList, onRemoveTodo, onUpdateCompletion, onEditTodo }) {
   return (
     <ul>
       {todoList.map((item) => {
@@ -11,6 +11,7 @@ function TodoList({ todoList, onRemoveTodo, onUpdateCompletion }) {
             item={item}
             onRemoveTodo={onRemoveTodo}
             onUpdateCompletion={onUpdateCompletion}
+            onEditTodo={onEditTodo}
           />
         );
       })}
@@ -27,6 +28,7 @@ TodoList.propTypes = {
   ).isRequired,
   onRemoveTodo: PropTypes.func.isRequired,
   onUpdateCompletion: PropTypes.func,
+  onEditTodo: PropTypes.func,
 };
 
 export default TodoList;
