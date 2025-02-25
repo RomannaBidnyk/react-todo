@@ -3,10 +3,10 @@
   justify-content: space-between;
   align-items: center;
   color: green;
-  background-color: #f4e1c1;
+  background-color: #fed7c6;
   margin: 0.4rem 0;
   padding: 0.3rem;
-  border: 1px solid #d9bfa2;
+  border: 1px solid #feb4aa;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   list-style: none;
@@ -14,7 +14,6 @@
 
 .ListItem:hover {
   color: #381875;
-  font-weight: bold;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
