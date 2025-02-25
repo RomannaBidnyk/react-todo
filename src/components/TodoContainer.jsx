@@ -4,13 +4,14 @@ import AddTodoForm from "./AddTodoForm";
 import TodoList from "./TodoList";
 import Pagination from "./Pagination";
 import Filtering from "./Filtering";
+import Sorting from "./Sorting";
 
 function TodoContainer({ tableName }) {
   const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState("asc");
   const [sortField, setSortField] = useState("title");
-  const [filter, setFilter] = useState("all");  // "all", "todo", "done"
+  const [filter, setFilter] = useState("all"); // "all", "todo", "done"
 
   const [currentPage, setCurrentPage] = useState(1);
   const todosPerPage = 10;
@@ -222,19 +223,12 @@ function TodoContainer({ tableName }) {
   return (
     <div style={{ padding: "20px" }}>
       <h1>ToDo List: {tableName}</h1>
-      <label>Sort by: </label>
-      <select
-        value={`${sortField}-${sortOrder}`}
-        onChange={(e) => handleSortChange(e.target.value)}
-      >
-        <option value="title-asc">Title A-Z</option>
-        <option value="title-desc">Title Z-A</option>
-        <option value="completedAt-asc">Completed At (Oldest First)</option>
-        <option value="completedAt-desc">Completed At (Newest First)</option>
-      </select>
-
+      <Sorting
+        sortField={sortField}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+      />
       <AddTodoForm onAddTodo={addTodo} />
-
       <Filtering filter={filter} setFilter={setFilter} />
 
       {isLoading ? (
